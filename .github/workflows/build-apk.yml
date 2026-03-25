@@ -9,8 +9,10 @@ permissions:
   contents: read
 
 env:
-  FLUTTER_VERSION: stable
+  FLUTTER_VERSION: "3.24.5"
   APP_NAME: real-life-side-quest
+  ANDROID_NDK_VERSION: "27.0.12077973"
+  GRADLE_OPTS: "-Dorg.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=1g -Dkotlin.daemon.jvm.options=-Xmx2g -Dfile.encoding=UTF-8"
 
 jobs:
   build-apk:
@@ -27,9 +29,26 @@ jobs:
           distribution: temurin
           java-version: "17"
 
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android SDK components
+        shell: bash
+        run: |
+          sdkmanager --install \
+            "platform-tools" \
+            "platforms;android-34" \
+            "build-tools;34.0.0" \
+            "ndk;${ANDROID_NDK_VERSION}"
+
+      - name: Accept Android SDK licenses
+        shell: bash
+        run: yes | sdkmanager --licenses
+
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
           channel: stable
           cache: true
 
@@ -46,40 +65,34 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Resolve version info
-        id: version
-        shell: bash
-        run: |
-          VERSION_LINE=$(grep '^version:' pubspec.yaml | awk '{print $2}')
-          VERSION_NAME=${VERSION_LINE%%+*}
-          VERSION_BUILD=${VERSION_LINE##*+}
-
-          if [ "$VERSION_NAME" = "$VERSION_LINE" ]; then
-            VERSION_BUILD=${{ github.run_number }}
-          fi
-
-          echo "version_name=$VERSION_NAME" >> "$GITHUB_OUTPUT"
-          echo "version_build=$VERSION_BUILD" >> "$GITHUB_OUTPUT"
-
       - name: Build release APK
         run: |
-          flutter build apk \
-            --release \
-            --build-name "${{ steps.version.outputs.version_name }}" \
-            --build-number "${{ steps.version.outputs.version_build }}"
+          flutter doctor -v
+          flutter build apk --release
 
-      - name: Rename APK with app and version
+      - name: Verify APK output
         shell: bash
         run: |
-          SOURCE_APK="build/app/outputs/flutter-apk/app-release.apk"
-          TARGET_APK="build/app/outputs/flutter-apk/${APP_NAME}-v${{ steps.version.outputs.version_name }}+${{ steps.version.outputs.version_build }}.apk"
-          mv "$SOURCE_APK" "$TARGET_APK"
-          echo "Renamed APK: $TARGET_APK"
+          test -f build/app/outputs/flutter-apk/app-release.apk
+          ls -lah build/app/outputs/flutter-apk/
+
+      - name: Upload failure logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-failure-logs-${{ github.run_number }}
+          path: |
+            build/**/outputs/**/*.txt
+            build/**/reports/**
+            android/**/build/reports/**
+            /home/runner/.gradle/daemon/**/daemon-*.out.log
+          if-no-files-found: ignore
+          retention-days: 5
 
       - name: Upload release APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.APP_NAME }}-v${{ steps.version.outputs.version_name }}+${{ steps.version.outputs.version_build }}
-          path: build/app/outputs/flutter-apk/${{ env.APP_NAME }}-v${{ steps.version.outputs.version_name }}+${{ steps.version.outputs.version_build }}.apk
+          name: ${{ env.APP_NAME }}-release-${{ github.run_number }}
+          path: build/app/outputs/flutter-apk/app-release.apk
           if-no-files-found: error
           retention-days: 5
