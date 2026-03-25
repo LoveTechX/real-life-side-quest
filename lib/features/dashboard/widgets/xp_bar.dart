@@ -11,7 +11,7 @@ class XpBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(16),
@@ -24,20 +24,24 @@ class XpBar extends StatelessWidget {
             children: <Widget>[
               Text(
                 'XP Progress',
-                style: Theme.of(context).textTheme.titleMedium,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
               ),
               Text(
                 '${xp.currentXP}/${xp.requiredXP}',
-                style: Theme.of(context).textTheme.bodyMedium,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w500,
+                ),
               ),
             ],
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 12),
           ClipRRect(
             borderRadius: BorderRadius.circular(999),
             child: LinearProgressIndicator(
               value: xp.progress,
-              minHeight: 10,
+              minHeight: 12,
               backgroundColor: AppColors.background,
               valueColor: const AlwaysStoppedAnimation<Color>(
                 AppColors.primary,

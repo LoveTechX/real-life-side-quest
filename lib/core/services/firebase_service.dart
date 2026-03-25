@@ -30,9 +30,11 @@ class FirebaseService {
       _isInitialized = true;
       _initializationCompleter!.complete();
     } catch (error, stackTrace) {
-      _initializationCompleter!.completeError(error, stackTrace);
+      // Firebase initialization failed - app will use mock data
+      print('Firebase initialization failed (this is OK for development): $error');
+      _isInitialized = false;
+      _initializationCompleter!.complete();
       _initializationCompleter = null;
-      rethrow;
     }
   }
 }

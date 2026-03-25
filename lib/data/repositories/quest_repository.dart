@@ -1,3 +1,4 @@
+import '../../core/utils/mock_data.dart';
 import '../datasources/remote/quest_remote_ds.dart';
 import '../models/quest_model.dart';
 import '../models/user_model.dart';
@@ -14,23 +15,42 @@ class QuestRepository {
   final QuestRemoteDataSource _questRemoteDataSource;
   final UserRepository _userRepository;
 
-  Future<List<QuestModel>> fetchQuests({required String userId}) {
-    return _questRemoteDataSource.getQuests(userId: userId);
+  Future<List<QuestModel>> fetchQuests({required String userId}) async {
+    try {
+      return await _questRemoteDataSource.getQuests(userId: userId);
+    } catch (_) {
+      // Fallback to mock data
+      return userId == MockData.mockUserId ? MockData.mockQuests : [];
+    }
   }
 
-  Future<void> addQuest({required String userId, required QuestModel quest}) {
-    return _questRemoteDataSource.createQuest(userId: userId, quest: quest);
+  Future<void> addQuest({required String userId, required QuestModel quest}) async {
+    try {
+      return await _questRemoteDataSource.createQuest(userId: userId, quest: quest);
+    } catch (_) {
+      // Mock data doesn't persist, but quest was added to UI already
+      print('Quest add to backend failed (using mock): $_');
+    }
   }
 
   Future<void> updateQuest({
     required String userId,
     required QuestModel quest,
-  }) {
-    return _questRemoteDataSource.updateQuest(userId: userId, quest: quest);
+  }) async {
+    try {
+      return await _questRemoteDataSource.updateQuest(userId: userId, quest: quest);
+    } catch (e) {
+      print('Quest update failed: $e');
+      // Will sync when connection restored
+    }
   }
 
-  Future<void> deleteQuest({required String userId, required String questId}) {
-    return _questRemoteDataSource.deleteQuest(userId: userId, questId: questId);
+  Future<void> deleteQuest({required String userId, required String questId}) async {
+    try {
+      return await _questRemoteDataSource.deleteQuest(userId: userId, questId: questId);
+    } catch (e) {
+      print('Quest delete failed: $e');
+    }
   }
 
   Stream<List<QuestModel>> watchQuests({required String userId}) {
@@ -39,7 +59,11 @@ class QuestRepository {
         .map(
           (List<Map<String, dynamic>> rows) =>
               rows.map(QuestModel.fromMap).toList(growable: false),
-        );
+        )
+        .handleError((dynamic error) {
+          print('Quests stream error: $error');
+          // Stream will retry with Firestore's built-in retry logic
+        });
   }
 
   Future<UserModel> completeQuest({

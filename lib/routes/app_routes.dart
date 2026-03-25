@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../features/dashboard/screens/dashboard_screen.dart';
 import 'route_names.dart';
 
 class AppRoutes {
@@ -8,16 +9,16 @@ class AppRoutes {
   static final GlobalKey<NavigatorState> navigatorKey =
       GlobalKey<NavigatorState>();
 
-  static const String initialRoute = RouteNames.splash;
+  static const String initialRoute = RouteNames.home;
 
   static final Map<String, WidgetBuilder> _routeBuilders =
       <String, WidgetBuilder>{
-        RouteNames.splash: (_) => const _ArchitecturePlaceholderPage(),
-        RouteNames.login: (_) => const _ArchitecturePlaceholderPage(),
-        RouteNames.signup: (_) => const _ArchitecturePlaceholderPage(),
-        RouteNames.home: (_) => const _ArchitecturePlaceholderPage(),
-        RouteNames.quests: (_) => const _ArchitecturePlaceholderPage(),
-        RouteNames.profile: (_) => const _ArchitecturePlaceholderPage(),
+        RouteNames.home: (_) => const DashboardScreen(),
+        RouteNames.quests: (_) => const DashboardScreen(),
+        RouteNames.profile: (_) => const DashboardScreen(),
+        RouteNames.splash: (_) => const DashboardScreen(),
+        RouteNames.login: (_) => const DashboardScreen(),
+        RouteNames.signup: (_) => const DashboardScreen(),
       };
 
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
@@ -31,17 +32,8 @@ class AppRoutes {
 
   static Route<dynamic> onUnknownRoute(RouteSettings settings) {
     return MaterialPageRoute<void>(
-      builder: (_) => const _ArchitecturePlaceholderPage(),
+      builder: (_) => const DashboardScreen(),
       settings: settings,
     );
-  }
-}
-
-class _ArchitecturePlaceholderPage extends StatelessWidget {
-  const _ArchitecturePlaceholderPage();
-
-  @override
-  Widget build(BuildContext context) {
-    return const SizedBox.shrink();
   }
 }

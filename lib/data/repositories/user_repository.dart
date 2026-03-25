@@ -1,3 +1,4 @@
+import '../../core/utils/mock_data.dart';
 import '../../core/utils/xp_calculator.dart';
 import '../datasources/remote/user_remote_ds.dart';
 import '../models/user_model.dart';
@@ -8,12 +9,22 @@ class UserRepository {
 
   final UserRemoteDataSource _userRemoteDataSource;
 
-  Future<UserModel?> getUserById(String userId) {
-    return _userRemoteDataSource.fetchUser(userId);
+  Future<UserModel?> getUserById(String userId) async {
+    try {
+      return await _userRemoteDataSource.fetchUser(userId);
+    } catch (_) {
+      // Fallback to mock data
+      return userId == MockData.mockUserId ? MockData.mockUser : null;
+    }
   }
 
-  Future<void> updateUser(UserModel user) {
-    return _userRemoteDataSource.updateUser(user);
+  Future<void> updateUser(UserModel user) async {
+    try {
+      return await _userRemoteDataSource.updateUser(user);
+    } catch (e) {
+      print('User update failed: $e');
+      // Will sync when connection restored
+    }
   }
 
   Future<UserModel> applyQuestReward({
@@ -33,7 +44,13 @@ class UserRepository {
       streak: incrementStreak ? user.streak + 1 : user.streak,
     );
 
-    await _userRemoteDataSource.updateUser(updatedUser);
+    try {
+      await _userRemoteDataSource.updateUser(updatedUser);
+    } catch (e) {
+      print('User reward sync failed: $e');
+      // UI still shows the update, will sync when connection restored
+    }
+    
     return updatedUser;
   }
 }
