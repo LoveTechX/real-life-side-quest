@@ -151,7 +151,7 @@ class HomeScreen extends StatelessWidget {
                         child: Text(
                           'No quests yet for today.',
                           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: AppColors.textPrimary.withValues(alpha: 0.6),
+                            color: AppColors.textPrimary.withOpacity(0.6),
                           ),
                         ),
                       )

@@ -20,7 +20,7 @@ class LevelCard extends StatelessWidget {
         children: <Widget>[
           CircleAvatar(
             radius: 24,
-            backgroundColor: AppColors.primary.withValues(alpha: 0.15),
+            backgroundColor: AppColors.primary.withOpacity(0.15),
             child: Text(
               '${user.level}',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -44,7 +44,7 @@ class LevelCard extends StatelessWidget {
                 Text(
                   '${user.name} • Streak ${user.streak}',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppColors.textPrimary.withValues(alpha: 0.7),
+                    color: AppColors.textPrimary.withOpacity(0.7),
                   ),
                 ),
               ],

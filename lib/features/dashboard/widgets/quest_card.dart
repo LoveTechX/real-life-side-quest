@@ -30,7 +30,7 @@ class QuestCard extends StatelessWidget {
             color: AppColors.surface,
             borderRadius: BorderRadius.circular(14),
             border: !quest.isCompleted
-                ? Border.all(color: AppColors.primary.withValues(alpha: 0.2))
+              ? Border.all(color: AppColors.primary.withOpacity(0.2))
                 : null,
           ),
           child: Column(
@@ -49,7 +49,7 @@ class QuestCard extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: badgeColor.withValues(alpha: 0.15),
+                      color: badgeColor.withOpacity(0.15),
                       borderRadius: BorderRadius.circular(999),
                     ),
                     child: Text(
@@ -66,7 +66,7 @@ class QuestCard extends StatelessWidget {
               Text(
                 quest.description,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: AppColors.textPrimary.withValues(alpha: 0.75),
+                  color: AppColors.textPrimary.withOpacity(0.75),
                 ),
               ),
               if (quest.isCompleted) ...[
